@@ -1,6 +1,5 @@
 const gridSize = 10;
 let grid = [];
-let isCreatorMode = true;
 let placingType = "player"; // Current object type to place
 let playerPositions = [];
 let zombiePositions = [];
@@ -26,8 +25,6 @@ function createGrid() {
 }
 
 function onCellClick(x, y) {
-  if (!isCreatorMode) return;
-
   const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
 
   switch (placingType) {
@@ -55,8 +52,7 @@ function onCellClick(x, y) {
   }
 }
 
-function switchToPlayMode() {
-  isCreatorMode = false;
+function findPaths() {
   playerPositions.forEach((player) => {
     zombiePositions.forEach((zombie) => {
       const path = findPath(zombie, player);
@@ -145,7 +141,7 @@ function drawPath(path) {
   });
 }
 
-// Event listeners for mode buttons
+// Event listeners for placing buttons
 document.getElementById("placePlayer").addEventListener("click", () => {
   placingType = "player";
 });
@@ -158,11 +154,8 @@ document.getElementById("placeObstacle").addEventListener("click", () => {
   placingType = "obstacle";
 });
 
-document.getElementById("creatorMode").addEventListener("click", () => {
-  isCreatorMode = true;
-});
-
-document.getElementById("playMode").addEventListener("click", switchToPlayMode);
+// Event listener for the Find Paths button
+document.getElementById("findPaths").addEventListener("click", findPaths);
 
 // Initialize the grid on page load
 createGrid();
