@@ -1,8 +1,9 @@
 const gridSize = 10;
 let grid = [];
 let isCreatorMode = true;
-let playerPos = null;
-let zombiePos = null;
+let placingType = "player"; // Current object type to place
+let playerPositions = [];
+let zombiePositions = [];
 
 function createGrid() {
   const gridElement = document.getElementById("grid");
@@ -29,33 +30,41 @@ function onCellClick(x, y) {
 
   const cell = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
 
-  if (!playerPos) {
-    playerPos = { x, y };
-    cell.classList.add("player");
-  } else if (!zombiePos) {
-    zombiePos = { x, y };
-    cell.classList.add("zombie");
-  } else {
-    if (grid[y][x] === 0) {
-      grid[y][x] = 1; // Mark as barrier
-      cell.classList.add("barrier");
-    } else {
-      grid[y][x] = 0; // Remove barrier
-      cell.classList.remove("barrier");
-    }
+  switch (placingType) {
+    case "player":
+      if (!cell.classList.contains("player")) {
+        playerPositions.push({ x, y });
+        cell.classList.add("player");
+      }
+      break;
+    case "zombie":
+      if (!cell.classList.contains("zombie")) {
+        zombiePositions.push({ x, y });
+        cell.classList.add("zombie");
+      }
+      break;
+    case "obstacle":
+      if (grid[y][x] === 0) {
+        grid[y][x] = 1; // Mark as barrier
+        cell.classList.add("barrier");
+      } else {
+        grid[y][x] = 0; // Remove barrier
+        cell.classList.remove("barrier");
+      }
+      break;
   }
 }
 
 function switchToPlayMode() {
   isCreatorMode = false;
-  if (playerPos && zombiePos) {
-    const path = findPath(playerPos, zombiePos);
-    if (path) {
-      drawPath(path);
-    } else {
-      alert("No path found!");
-    }
-  }
+  playerPositions.forEach((player) => {
+    zombiePositions.forEach((zombie) => {
+      const path = findPath(zombie, player);
+      if (path) {
+        drawPath(path);
+      }
+    });
+  });
 }
 
 function findPath(start, end) {
@@ -137,6 +146,18 @@ function drawPath(path) {
 }
 
 // Event listeners for mode buttons
+document.getElementById("placePlayer").addEventListener("click", () => {
+  placingType = "player";
+});
+
+document.getElementById("placeZombie").addEventListener("click", () => {
+  placingType = "zombie";
+});
+
+document.getElementById("placeObstacle").addEventListener("click", () => {
+  placingType = "obstacle";
+});
+
 document.getElementById("creatorMode").addEventListener("click", () => {
   isCreatorMode = true;
 });
